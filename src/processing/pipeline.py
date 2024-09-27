@@ -7,9 +7,35 @@ from io import StringIO
 
 st.set_page_config(layout='wide')
 
+
 # ------------------------------------------ PIPELINE LISTA-SETOR.CSV
 
-df_setor = pd.read_csv(r'C:\Users\00840207255\Desktop\App Monitoramento de Processos\data\raw\lista-setor.csv')
+df_setores = pd.read_csv(r'C:\Users\00840207255\OneDrive - Minha Empresa\Aplicativos\App Monitoramento de Processos\data\raw\lista-setor.csv')
+
+# Criar df's separados para tratar a coluna de documentos
+coluna_setor_processo = df_setores[['Setor', 'Processo']]
+coluna_documento= df_setores[['Documento']]
+
+# Lista de algarismos romanos
+romans = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 
+          'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII', 
+          'XIX', 'XX', 'XXI', 'XXII', 'XXIII', 'XXIV', 'XXV', 'XXVI', 
+          'XXVII', 'XXVIII', 'XXIX', 'XXX', 'XXXI', 'XXXII', 'XXXIII', 
+          'XXXIV', 'XXXV', 'XXXVI', 'XXXVII', 'XXXVIII', 'XXXIX', 
+          'XL', 'XLI', 'XLII', 'XLIII', 'XLIV', 'XLV', 'XLVI', 'XLVII', 
+          'XLVIII', 'XLIX', 'L']
+# Excluir a primeira linha
+coluna_documento = coluna_documento.drop(index=0).reset_index()
+
+# Excluir linhas onde o 'Documento' é um algarismo romano
+coluna_documento = coluna_documento[~coluna_documento['Documento'].isin(romans)].reset_index()
+
+
+
+# Unir os DataFrames lado a lado
+df_setor = pd.concat([coluna_documento, coluna_setor_processo], axis=1)
+
+
 
 # Função para extrair o protocolo
 def extrair_protocolo(texto):
@@ -30,7 +56,7 @@ df_setor = df_setor.dropna(subset=['Protocolo'])
 
 # ------------------------------------------ PIPELINE DADOS_EXTRAIDOS.CSV
 
-df_dados = pd.read_csv(r'C:\Users\00840207255\Desktop\App Monitoramento de Processos\data\raw\dados_extraidos.csv', dtype={'Protocolo': str})
+df_dados = pd.read_csv(r'C:\Users\00840207255\OneDrive - Minha Empresa\Aplicativos\App Monitoramento de Processos\data\raw\dados_extraidos.csv', dtype={'Protocolo': str})
 
 df_dados['Data'] = pd.to_datetime(df_dados['Data'], format='%d/%m/%Y',)
 
@@ -64,19 +90,15 @@ df_dados = df_dados.groupby('ID').agg({
     'Documento': 'first'  # Mantém o primeiro valor
 }).reset_index()
 df_dados.rename(columns={'ID': 'Protocolo'}, inplace=True)
-df_dados
 
 
 df_merge = pd.merge(df_dados, df_setor[['Protocolo','Setor']], on='Protocolo', how='left')
-df_merge
-# Criando colunas para dia, mês e ano
-# df_merge['Dia'] = df_merge['Data'].dt.day
-# df_merge['Mês'] = df_merge['Data'].dt.month
-# df_merge['Ano'] = df_merge['Data'].dt.year
+
+
 
 # Salvar os dados extraídos em um arquivo CSV
 df_setor = pd.DataFrame(df_setor)
-csv_setor = os.path.join(os.getcwd(), r'C:\Users\00840207255\Desktop\App Monitoramento de Processos\data\processed\df_setor.csv')
+csv_setor = os.path.join(os.getcwd(), r'C:\Users\00840207255\OneDrive - Minha Empresa\Aplicativos\App Monitoramento de Processos\data\processed\df_setor.csv')
 df_setor.to_csv(csv_setor, index=False)
 print(f"Dados salvos no arquivo: {csv_setor}")
 print(type(df_setor))
@@ -85,7 +107,7 @@ print(type(df_setor))
 
 # Salvar os dados extraídos em um arquivo CSV
 df_dados = pd.DataFrame(df_dados)
-csv_dados = os.path.join(os.getcwd(), r'C:\Users\00840207255\Desktop\App Monitoramento de Processos\data\processed\df_dados.csv')
+csv_dados = os.path.join(os.getcwd(), r'C:\Users\00840207255\OneDrive - Minha Empresa\Aplicativos\App Monitoramento de Processos\data\processed\df_dados.csv')
 df_dados.to_csv(csv_dados, index=False)
 print(f"Dados salvos no arquivo: {csv_dados}")
 print(type(df_dados))
@@ -93,7 +115,7 @@ print(type(df_dados))
 
 # Salvar os dados extraídos em um arquivo CSV
 df_merge = pd.DataFrame(df_merge)
-csv_df = os.path.join(os.getcwd(), r'C:\Users\00840207255\Desktop\App Monitoramento de Processos\data\processed\df_merge.csv')
+csv_df = os.path.join(os.getcwd(), r'C:\Users\00840207255\OneDrive - Minha Empresa\Aplicativos\App Monitoramento de Processos\data\processed\df_merge.csv')
 df_merge.to_csv(csv_df, index=False)
 print(f"Dados salvos no arquivo: {csv_df}")
 print(type(df_merge))
