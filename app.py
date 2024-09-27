@@ -6,7 +6,6 @@ from datetime import datetime
 st.set_page_config(
     layout="wide",
     page_title="Início",
-    initial_sidebar_state= "expanded",
     
 )
 
@@ -18,21 +17,15 @@ st.markdown(
 # Personalizar a sidebar
 st.text("Resumo de andamentos de processos da gerência de compras - SESAU/RO")
 st.divider()
-st.sidebar.header('Menu de Filtros')
+# st.sidebar.header('Menu de Filtros')
 
 df = pd.read_csv(r'data/processed/df_merge.csv', dtype={'Protocolo': str})
-
 
 # Convertendo a coluna 'Data' para o tipo datetime
 df['Data'] = pd.to_datetime(df['Data'], format='%Y-%m-%d')
 df.info()
 
 df.groupby('Processo')['Protocolo'].count()
-
-
-
-
-
 
 
 # Ordenando o DataFrame pelo número do processo e pela data
@@ -71,8 +64,6 @@ df_selected = pd.concat([df_selected, pd.DataFrame([novo_registro])], ignore_ind
 # Recalculando as colunas 'Dias entre Documentos' e 'Dias Acumulados'
 df_selected['Dias entre Documentos'] = df_selected.groupby('Processo')['Data'].diff().dt.days
 df_selected['Dias Acumulados'] = df_selected.groupby('Processo')['Data'].transform(lambda x: (x - x.min()).dt.days)
-
-
 
 
 # Figura
